@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .container img{
+            width: 250px;
+            height: 200px;
+        }
+    </style>
+</head>
+{# 三种不需要刷新页面的方式 #}
+<body>
+    <h1>测试Iframe功能,输入路径显示照片</h1>
+    <input type="text" id="url" />
+    <input type="button" value="显示" onclick="iframeChange();" />
+    <iframe id="ifr" src="" height="250px" width="200px"></iframe>
+    <hr/>
+
+    <h1>基于iframe实现form提交</h1>
+    {# 需要注释'django.middleware.clickjacking.XFrameOptionsMiddleware' #}
+    <form action="/upload_ajax.html" method="post" target="iframe_1" enctype="multipart/form-data">
+        {# display: none 不显示 但是数据仍然在iframe里 onload当加载完成后执行 #}
+        <iframe style="display: none" id="iframe_1" name="iframe_1" src=" " onload="loadIframe();"></iframe>
+        <input type="file" name="file_text" />
+        <input type="submit" />
+    </form>
+    <hr/>
+
+    <h1>基于fromdata实现提交</h1>
+    <input type="file" id="img" />
+    <input type="button" value="XML提交" onclick="UploadXML()" />
+    <input type="button" value="JQ提交" onclick="Uploadjq()" />
+    <hr/>
+
+    <h1>数据库中图片</h1>
+    <div class="container" id="imgs">
+        {% for img in img_list %}
+            <img src="/{{ img.path }}">
+        {% endfor %}
+    </div>
+    <script src="/abc/jquery-2.1.4.min.js"></script>
+    <script>
+        function  iframeChange() {
+            var url = $('#url').val();
+            $('#ifr').attr('src', url);
+        }
+
+        function loadIframe() {
+            // 获取iframe内部的内容
+            var str_json = $('#iframe_1').contents().find('body').text();
+            var obj = JSON.parse(str_json);
+            if (obj.status){
+                var img = document.createElement('img');
+                img.src = "/" + obj.path;
+                $('#imgs').append(img);
+            }
+        }
+
+        function UploadXML() {
+            var dic = new FormData();
+            dic.append('file_text', document.getElementById('img').files[0]);
+            var xml = new XMLHttpRequest();
+            xml.open('post', '/upload_ajax.html', true);
+            xml.onreadystatechange = function () {
+                if(xml.readyState == 4){
+                    var obj = JSON.parse(xml.responseText);
+                    if(obj.status){
+                        var img = document.createElement('img');
+                        img.src = "/" + obj.path;
+                        document.getElementById("imgs").appendChild(img);
+                    }
+                }
+            };
+            xml.send(dic);
+        }
+
+        function Uploadjq() {
+            var dic = new FormData();
+            dic.append('file_text', document.getElementById('img').files[0]);
+            $.ajax({
+                url: '/upload_ajax.html',
+                type: 'POST',
+                data: dic,
+                processData: false,  // tell jQuery not to process the data
+                contentType: false,  // tell jQuery not to set contentType
+                dataType: 'JSON',
+                success: function (arg) {
+                    if (arg.status){
+                        var img = document.createElement('img');
+                        img.src = "/" + arg.path;
+                        $('#imgs').append(img);
+                    }
+                }
+            })
+        }
+    </script>
+</body>
+</html>

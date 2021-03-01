@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+
+
+{% block css %}
+    <style>
+        .tag{
+            display: inline-block;
+            padding: 5px;
+            border: 1px solid darkgrey;
+            background-color: grey;
+            {# 变手指 #}
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+
+{# 循环次数较多 #}
+{#{% block content %}#}
+{#    <h1>老师列表</h1>#}
+{#    <table border="1">#}
+{#        <thead>#}
+{#            <tr>#}
+{#                <th>老师ID</th>#}
+{#                <th>老师姓名</th>#}
+{#                <th>教授班级</th>#}
+{#            </tr>#}
+{#        </thead>#}
+{#        <tbody>#}
+{#            {% for obj in teacher_list %}#}
+{#                <tr>#}
+{#                    <td>{{ obj.id }}</td>#}
+{#                    <td>{{ obj.name }}</td>#}
+{#                    <td>#}
+{#                        {% for c in obj.cls.all %}#}
+{#                            <span class="tag" nid="{{ c.id }}">{{ c.caption }}</span>#}
+{#                        {% endfor %}#}
+{#                    </td>#}
+{#                </tr>#}
+{#            {% endfor %}#}
+{#        </tbody>#}
+{#    </table>#}
+{#{% endblock %}#}
+
+
+{# 循环次数较少 #}
+{% block content %}
+    <h1>老师列表</h1>
+    <div>
+        <a href="/add_teacher.html">添加</a>
+    </div>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>老师ID</th>
+                <th>老师姓名</th>
+                <th>教授班级</th>
+                <th> 操 作 </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dic in teacher_list.values %}
+                <tr>
+                    <td>{{ dic.nid }}</td>
+                    <td>{{ dic.name }}</td>
+                    <td>
+                        {% for c in dic.cls_list %}
+                            <span class="tag" nid="{{ c.id }}">{{ c.caption }}</span>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <a href="/edit_teacher-{{ dic.nid }}.html">编辑</a>
+                        <a href="/edit_teacher_lr-{{ dic.nid }}.html">左右移动编辑</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $(function () {
+            $('#menu_teacher').addClass('active');
+        })
+    </script>
+{% endblock %}

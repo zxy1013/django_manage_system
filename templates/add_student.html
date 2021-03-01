@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+
+{% block css %}
+{% endblock %}
+
+
+{% block content %}
+    <h1>添加学生</h1>
+    <form action="/add_student.html" method="POST">
+        <p>
+            <input placeholder="学生姓名" type="text" name="name" />
+        </p>
+        <p>
+            <!-- 选择 "班级ID" 显示的为caption-->
+            <select name="cls_id">
+                {% for op in cls_list %}
+                    <option value="{{ op.id }}">{{ op.caption }}</option>
+                {% endfor %}
+            </select>
+        </p>
+        <input type="submit" value="提交"/>
+    </form>
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $(function () {
+            $('#menu_student').addClass('active');
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,192 @@
+{% extends "layout.html" %}
+
+{% block css %}
+{% endblock %}
+
+{# id用_,class用- #}
+{% block content %}
+    <h1>班级列表</h1>
+    <div>
+        {# 模态动画框 #}
+        <input id="id_add" type="button" value="添加" />
+        {# 单独页面 form表单 #}
+        <a href="/add_classes.html">添加</a>
+    </div>
+    <table border="1">
+        <thead>
+            <tr>
+                <th> ID </th>
+                <th>标题</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cls_list %}
+                <tr>
+                    <td al="id">{{ item.id }}</td>
+                    <td al="caption">{{ item.caption }}</td>
+                    <td>
+                        <a class="td-edit">编辑</a> | <a target="_blank" href="/edit_classes.html?nid={{ item.id }}">跳转编辑</a> | <a class="td-delete">删除</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {# 以标签解释,分页 #}
+    <div class="pagination">
+        {{ str_pager|safe }}
+    </div>
+
+    <div class="modal hide">
+        <form method="post" action="/classes.html" >
+            <input name="id" class="hide" type="text" placeholder="nid" />
+            <input name="caption" type="text" placeholder="标题" />
+            <input id="id_modal_cancel" type="button" value="取消"/>
+            <input type="submit" value="Submit确定"/>
+            <input type="button" id="modal_ajax_submit" value="Ajax确定"/>
+        </form>
+    </div>
+    <div class="shade hide"></div>
+    <div class="remove hide">
+        <input name="id" class="hide" type="text" placeholder="nid" />
+        <input name="caption" type="text" placeholder="标题" />
+        <input id="id_remove_cancel" type="button" value="取消"/>
+        <input id="id_remove_submit" type="button" value="确定"/>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $(function () {
+            $('#menu_class').addClass('active');
+            bindAddEvent();
+            bindCancelEvent();
+            bindTdDeleteEvent();
+            bindSubmitModal();
+            bindTdEditEvent();
+        });
+
+
+        type_op = 0;
+        SUBMIT_URL = "/classes.html";
+        function bindAddEvent() {
+            $('#id_add').click(function () {
+                $('.modal,.shade').removeClass('hide');
+                type_op = 1;
+            });
+        }
+
+
+        function  bindTdEditEvent() {
+            $('tbody').on('click', '.td-edit', function () {
+                $('.modal,.shade').removeClass('hide');
+                $(this).parent().prevAll().each(function () {
+                    {# $(this)为td 取每个td的text和name #}
+                    var text = $(this).text();
+                    var name = $(this).attr('al');
+                    {# 设置显示数据 #}
+                    $('.modal input[name="' + name +'"]').val(text);
+                    type_op = 2;
+                })
+            })
+        }
+
+
+        function  bindCancelEvent() {
+            $('#id_modal_cancel,#id_remove_cancel').click(function () {
+                $('.modal,.shade,.remove').addClass('hide');
+            });
+        }
+
+        function  bindTdDeleteEvent() {
+            // 委托型，对后续插入的数据也执行delete操作
+            $('tbody').on('click', '.td-delete', function () {
+                $('.remove,.shade').removeClass('hide');
+                $(this).parent().prevAll().each(function () {
+                    {# $(this)为td 取每个td的text和name #}
+                    var text = $(this).text();
+                    var name = $(this).attr('al');
+                    {# 设置显示数据 #}
+                    $('.remove input[name="' + name + '"]').val(text);
+                    type_op = 3;
+                })
+            })}
+
+
+        function bindSubmitModal() {
+            $('#modal_ajax_submit,#id_remove_submit').click(function () {
+                if (type_op==3){
+                    var nid = $('.remove input[name="id"]').val();
+                    var value = $('.remove input[name="caption"]').val();
+                }
+                else{
+                    var nid = $('.modal input[name="id"]').val();
+                    var value = $('.modal input[name="caption"]').val();
+                }
+                $.ajax({
+                    url: SUBMIT_URL,
+                    type: 'POST',
+                    data: {caption: value, id: nid, type_op:type_op},
+                    dataType: "JSON",
+                    success: function (rep) {
+                        if (!rep.status) {
+                            alert(rep.error);
+                        } else {
+                            if (type_op == 1){
+                            {#// 添加成功可以直接当前页面刷新以关闭添加页面#}
+                            {#location.reload();#}
+
+                            // 或者通过js在table表格最后追加一行数据，追加的数据就是当前增加的数据，以以下形式
+                            /*
+                            <tr>
+                                <td>
+                            {{ item.id }}</td>
+                                <td>
+                            {{ item.caption }}</td>
+                                <td>
+                                    <a class="td-edit">编辑</a> | <a target="_blank" href="/edit_classes.html?nid=
+                            {{ item.id }}">跳转编辑</a> | <a class="td-delete">删除</a>
+                                </td>
+                            </tr>
+                            */
+                            var tr = document.createElement('tr');
+                            var td1 = document.createElement('td');
+                            // td1ID
+                            td1.innerHTML = rep.data.id;
+                            var td2 = document.createElement('td');
+                            // td2标题
+                            td2.innerHTML = rep.data.caption;
+                            var td3 = document.createElement('td');
+                            var a1 = document.createElement('a');
+                            a1.className = "td-edit";
+                            a1.innerHTML = "编辑 | ";
+                            var a2 = document.createElement('a');
+                            a2.href = "/edit_classes.html?nid={{ item.id }}";
+                            a2.target = "_blank";
+                            a2.innerHTML = "跳转编辑";
+                            var a3 = document.createElement('a');
+                            a3.className = "td-delete";
+                            a3.innerHTML = " | 删除";
+                            // 设置关系
+                            $(td3).append(a1);
+                            $(td3).append(a2);
+                            $(td3).append(a3);
+                            $(tr).append(td1);
+                            $(tr).append(td2);
+                            $(tr).append(td3);
+                            $('table tbody').append(tr);
+                            // 移除添加页面
+                            $('.modal,.shade').addClass('hide');}
+                            else if (type_op==2) {
+                                {#// 编辑成功可以直接当前页面刷新以关闭添加页面#}
+                                location.reload();
+                            }
+                            else if (type_op==3) {
+                                {#// 编辑成功可以直接当前页面刷新以关闭添加页面#}
+                                location.reload();
+                            }}}
+                })
+            })}
+    </script>
+{% endblock %}

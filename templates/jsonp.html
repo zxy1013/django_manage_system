@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <input type="button" onclick="jsonpRequest();" value="跨域请求" />
+    {#  由于自身不可实现跨域请求。通过jsonp动态的添加src属性实现，双方约定好返回数据为list([**，**，])形式。则拿到数据后删除src #}
+    <script>
+        TAG = null;
+        function jsonpRequest() {
+            TAG = document.createElement('script');
+            TAG.src = "http://www.jxntv.cn/data/jmd-jxtv2.html?callback=list&_=1454376870403";
+            document.head.appendChild(TAG);
+        }
+        function list(arg) {
+            console.log(arg);
+            document.head.removeChild(TAG);
+        }
+    </script>
+</body>
+</html>

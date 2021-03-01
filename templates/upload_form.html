@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+{# 基于form表单上传文件 #}
+<body>
+    <form method="POST" action="/upload_form.html" enctype="multipart/form-data">
+        <input type="text" name="user" />
+        <input type="file" name="file_text" />
+        <input type="submit" value="提交" />
+    </form>
+    <div>
+        {% for item in img_list %}
+            <img style="height: 250px;width: 200px;" src="/{{ item.path }}" />
+        {% endfor %}
+    </div>
+</body>
+</html>

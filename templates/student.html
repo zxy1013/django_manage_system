@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{# 继承母版 #}
+
+
+{% block css %}
+{% endblock %}
+{# 对css块修改，未添加任何内容 #}
+
+
+{% block content %}
+    <h1>学生列表</h1>
+    <div>
+        <a href="/add_student.html">添加</a>
+    </div>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>学生ID</th>
+                <th>学生姓名</th>
+                <th>所属班级ID</th>
+                <th>所属班级</th>
+                <th> 操 作 </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in result %}
+                <tr>
+                    <td>{{ row.id }}</td>
+                    <td>{{ row.name }}</td>
+                    <td>{{ row.cls.id }}</td>
+                    <td>{{ row.cls.caption }}</td>
+                    <td>
+                        <a href="/edit_student.html?nid={{ row.id }}">编辑</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+{# 对content块修改，添加标签 #}
+
+
+{% block js %}
+    <script>
+        $(function () {
+            $('#menu_student').addClass('active');
+        })
+    </script>
+{% endblock %}
+{# 对js块修改，添加类标签，设置点击时效果 #}

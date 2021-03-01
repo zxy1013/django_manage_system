@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+
+{% block css %}
+{% endblock %}
+
+
+{% block content %}
+    <h1>编辑老师</h1>
+    <form action="/edit_teacher-{{ obj.id }}.html" method="POST">
+        <input style="display: none" type="text" id="nid" value="{{ obj.id }}" />
+        <p>
+            老师姓名：<input name="name" type="text" value="{{ obj.name }}" />
+        </p>
+        <p>
+            已管理班级
+            <select id="sel" name="cls" multiple>
+                {% for row in obj_cls_list %}
+                    <option value="{{ row.0 }}">{{ row.1 }}</option>
+                {% endfor %}
+            </select>
+            未管理班级：
+            <select id="none" multiple>
+                {% for row in cls_list %}
+                    {% if row.id not in id_list %}
+                        <option value="{{ row.id }}">{{ row.caption }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </p>
+        <div>
+            <a id="removeCls"> >> </a>
+            <a id="addCls"> << </a>
+        </div>
+        <input type="submit" value="提交" id="submit_frm" />
+    </form>
+{% endblock %}
+
+{# DOM对象转换为jQuery对象 #}
+{# obj = document.getElementById('sel') #}
+{# $(obj) #}
+
+{# jQuery对象转换为DOM对象 #}
+{# $('#sel') #}
+{# $('#sel')[0] #}
+{# select标签的Dom对象中有 selectedOptions表示当前选项 #}
+
+{% block js %}
+    <script>
+        $(function () {
+            $('#menu_teacher').addClass('active');
+            bindSubmitForm();
+            bindRemoveCls();
+            bindAddCls();
+        });
+
+        function bindSubmitForm(){
+            $('#submit_frm').click(function () {
+                // 让select中的项目全选中
+                $('#sel').children().each(function () {
+                    $(this).prop('selected', true);
+                })
+            })
+        }
+
+        function bindRemoveCls() {
+            $('#removeCls').click(function () {
+                var options = $('#sel')[0].selectedOptions;
+                while(options.length>0){
+                    $(options[0]).appendTo('#none');
+                }
+            })
+        }
+
+        function bindAddCls() {
+            $('#addCls').click(function () {
+                var options = $('#none')[0].selectedOptions;
+                while(options.length>0){
+                    $(options[0]).appendTo('#sel');
+                }
+            })
+        }
+    </script>
+{% endblock %}
